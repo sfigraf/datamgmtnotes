@@ -1,0 +1,33 @@
+---
+title: "Untitled"
+author: "SamG"
+date: "February 22, 2019"
+output: html_document
+---
+#integrates code and graphics
+#knit to html to run
+#instert code by the insert in top left, copy and paste code
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Hello World!
+
+Below is a very pretty graph
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+flights %>%
+  group_by(origin) %>%
+  summarize(avg.flight.time = mean(air_time,
+                                   na.rm = TRUE)) %>%
+  ggplot(aes(x = reorder(origin,
+                         avg.flight.time),
+             y = avg.flight.time)) +
+  geom_bar(stat = "identity",
+           aes(fill = origin)) +
+  xlab("Origin")
+
+```
+

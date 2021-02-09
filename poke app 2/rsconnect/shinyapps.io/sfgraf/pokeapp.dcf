@@ -1,0 +1,12 @@
+name: pokeapp
+title: pokeapp
+username:
+account: sfgraf
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 882282
+bundleId: 2030043
+url: https://sfgraf.shinyapps.io/pokeapp/
+when: 1555954910.25526
+asMultiple: FALSE
+asStatic: FALSE

@@ -1,0 +1,169 @@
+---
+title: "HW1"
+author: "SamG"
+date: "February 22, 2019"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+question 1
+MarioKart (Wii) w/ wheel is the title of the least expensive Mariokart game that included at least 1 sterring wheel in the ebay auction
+
+```{r}
+library(tidyverse)
+library(openintro)
+data <- marioKart %>%
+  mutate(has.wheels = ifelse(wheels > 0, 
+                              1,
+                              0)) %>%
+  filter(has.wheels >0) %>%
+  arrange(totalPr)
+
+ 
+```
+
+Question 2
+The largest range in shipping price is the parcel shipping method, and the smallest is the UPS 3day. 
+
+```{r}
+data <- marioKart %>%
+  group_by(shipSp) %>%
+  summarize(max.price = max(shipPr),
+            min.price = min(shipPr)) %>%
+  mutate(range = max.price - min.price)
+
+      
+            
+  
+data
+
+```
+ 
+Q3
+The median price of used marioKart games is $42.8, the mean is $47.1. The median price for new games is $54 and the mean is $53.8. I imagine this could be because of a few very high priced games driving up the mean price of used games, like rare of collectible games. 
+```{r}
+data <- marioKart %>%
+  group_by(cond) %>%
+  summarize(mean.price = mean(totalPr),
+             median.price = median(totalPr))
+data
+  
+```
+Q4
+These results, specifically the fact that the mean price for used games was so much higher than the median price, were obtained becuase there are some extreme outliers in the used games that are driving up the mean price but do not affect the median. This is most easily seen in a boxplot of total price of the new and used games. There are no large outliers in the new games, but there are two outliers in the used games. 
+```{r}
+
+data <- marioKart %>%
+  group_by(cond) %>%
+  summarize(max.price = max(totalPr),
+            median.price = median(totalPr))
+data
+marioKart %>%
+  ggplot(mapping = aes(x = cond,
+             y = totalPr)) +
+  geom_boxplot(aes(fill = cond))
+```
+
+
+Q5
+I chose to remove the two largest values from the "used" category. I did this because the values were $326 and $128 which were both well oabove the maximum price ($75) of a new mariokart game. These are both valid data points, since they are probably collectors items and are coveted (both items have >1 bid on them), however, if we are interested in getting an accurate dataset of just "regular" marioKart games, it is best to leave these values out
+```{r}
+data <-marioKart %>%
+  arrange(-totalPr) %>%
+  filter(totalPr < 76) %>%
+  group_by(cond) %>%
+  summarize(mean.price = mean(totalPr),
+             median.price = median(totalPr))
+  
+data
+```
+
+Q6
+
+Median price for used games with any number of wheels: $45.75
+Median price for new games with any number of wheels: $53.99
+Median price for used games without any wheels: $38.06
+Median price for new games without any wheels: $47.38
+
+```{r}
+data <- marioKart %>%
+  mutate(has.wheels = ifelse(wheels > 0, 
+                             1,
+                             0)) %>%
+  group_by(has.wheels, cond) %>%
+  summarize(median.price = median(totalPr))
+data
+```
+
+Q7
+ProPortion of used games i'd be able to afford with $50: .85
+proportion of new games I'd be able to afford with $50: .36
+```{r}
+data <- marioKart %>%
+  group_by(cond) %>%
+  mutate(below_50 = ifelse(totalPr <50, 
+                           1,
+                           0)) %>%
+  mutate(totalnumbers = ifelse(totalPr >= 0, 1,0)) %>%
+  summarize(sum.below_50 = sum(below_50), #gets sums of those columns
+            sum.totalnumbers = sum(totalnumbers))
+
+data$porps <- data$sum.below_50 / data$sum.totalnumbers
+data
+```
+
+Q8
+Generally speaking, new games seemingly have higher ending prices than used ones, with the exception of the two large outliers. It seems like games with stock photos have a bit higher ending price than those without, but not that much of a difference. It is also important to note that we can't have more confidence in these observations without appropriate statistical tests, and also that the two outliers from the used games may lead to interpretations that might be somewhat different if the graphic was represented differntly. 
+```{r}
+marioKart %>%
+  ggplot(aes(x= startPr,
+             y = totalPr)) +
+  geom_point(aes(color = cond, shape = stockPhoto, size = 2))+
+  facet_grid(vars(cond), vars(stockPhoto))
+```
+
+Q9
+I would first want my game to be new.
+```{r}
+marioKart %>%
+  group_by(cond) %>%
+  summarize(median.total.price = median(totalPr)) %>%
+  ggplot(aes(x= cond, median.total.price,
+             
+             y = median.total.price)) +
+  geom_col(aes(fill = cond))
+```
+I would also want to ship by either media or UPS ground, since those are the msot expensive shipping methods
+```{r}
+marioKart %>%
+  group_by(shipSp) %>%
+  summarize(median.total.price = median(totalPr)) %>%
+  ggplot(aes(x= shipSp, median.total.price,
+             
+             y = median.total.price)) +
+  geom_col(aes(fill = shipSp))
+```
+
+I would want my game to have either 3 or 4 wheels (there was only 1 game that had 4 wheels so we can't say that I don't NOT want a 4 wheeled game)
+```{r}
+marioKart %>%
+  group_by(wheels) %>%
+  summarize(median.total.price = median(totalPr)) %>%
+  ggplot(aes(x= wheels, median.total.price,
+             
+             y = median.total.price)) +
+  geom_col(aes(fill = wheels))
+```
+I would also use a stock photo
+```{r}
+marioKart %>%
+  group_by(stockPhoto) %>%
+  summarize(median.total.price = median(totalPr)) %>%
+  ggplot(aes(x= stockPhoto, median.total.price,
+             
+             y = median.total.price)) +
+  geom_col(aes(fill = stockPhoto))
+```
+So to sum, I would list a new game with a higher number of wheels, use a stock photo, and ship with a media or UPSground shipping method. Seller rating, duration, and number of bids didn't particularly seems correlated with a higher total price. 
